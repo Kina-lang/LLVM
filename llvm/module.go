@@ -11,6 +11,7 @@ type Module struct {
 	Name    string
 	Context *Context
 	functions []*function
+	aliases  []*functionAlias
 }
 
 func NewModule(name string, context *Context) *Module {
@@ -31,6 +32,11 @@ func (m *Module) String() string {
 		fmt.Fprintf(&o, "%s\n", fn.String())
 	}
 
+	for _, alias := range m.aliases {
+		printComment(&o, fmt.Sprintf("Function alias %s (target: %s)", alias.Name, alias.Function.Name))
+		fmt.Fprintf(&o, "%s\n", alias.String())
+	}
+
 	return o.String()
 }
 
@@ -44,4 +50,29 @@ func printMeta(o *strings.Builder, m *Module) {
 	fmt.Fprintf(o, "source_filename = %q\n", m.Name)
 
 	printTargetMeta(o, &m.Context.target)
+}
+
+type functionAlias struct {
+	Name string
+	Function *function
+}
+
+func (a *functionAlias) String() string {
+	var params []string
+	for _, p := range a.Function.Params {
+		params = append(params, p.Type().String())
+	}
+
+	return fmt.Sprintf("@%s = alias %s, ptr @%s", a.Name, fmt.Sprintf("%s (%s)", a.Function.ReturnType, strings.Join(params, " ")), mangleName(a.Function.module.Name, a.Function.Name))
+}
+
+func (m *Module) NewFunctionAlias(name string, function *function) *functionAlias {
+	a := &functionAlias{
+		Name: name,
+		Function: function,
+	}
+
+	m.aliases = append(m.aliases, a)
+
+	return a
 }

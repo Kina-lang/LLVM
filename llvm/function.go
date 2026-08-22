@@ -23,6 +23,7 @@ type function struct {
 	ReturnType Type
 	Params []parameter
 
+	module *Module
 	blocks []*block
 
 	ssaCounter int
@@ -33,7 +34,9 @@ func (m *Module) NewFunction(name string, returnType Type, params ...parameter) 
 		Name: name,
 		ReturnType: returnType,
 		Params: params,
+
 		blocks: []*block{},
+		module: m,
 
 		ssaCounter: 0,
 	}
@@ -64,7 +67,7 @@ func (f *function) String() string {
 	}
 
 	// <keyword> <return type> @<function name>(<parameter types>)
-	fmt.Fprintf(&o, "%s %s @%s(%s)", keyword, f.ReturnType, f.Name, strings.Join(parameterStrings, ", "))
+	fmt.Fprintf(&o, "%s %s @%s(%s)", keyword, f.ReturnType, mangleName(f.module.Name, f.Name), strings.Join(parameterStrings, ", "))
 
 	// If no blocks (external function), return the string
 	if len(f.blocks) == 0 {

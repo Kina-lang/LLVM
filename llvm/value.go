@@ -1,6 +1,8 @@
 package llvm
 
-import "strconv"
+import (
+	"strconv"
+)
 
 type Value interface {
 	Type() Type
