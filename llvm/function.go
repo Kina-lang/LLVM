@@ -5,23 +5,30 @@ import (
 	"strings"
 )
 
-type parameter struct {
+type Parameter struct {
 	Name string
 	typ Type
 }
 
-func (p parameter) Type() Type {
+func (p Parameter) Type() Type {
 	return p.typ
 }
 
-func (p parameter) Identifier() string {
+func (p Parameter) Identifier() string {
 	return "%" + p.Name
 }
 
-type function struct {
+func NewParameter(name string, typ Type) *Parameter {
+	return &Parameter{
+		Name: name,
+		typ: typ,
+	}
+}
+
+type Function struct {
 	Name string
 	ReturnType Type
-	Params []parameter
+	Params []*Parameter
 
 	module *Module
 	blocks []*block
@@ -29,8 +36,8 @@ type function struct {
 	ssaCounter int
 }
 
-func (m *Module) NewFunction(name string, returnType Type, params ...parameter) *function {
-	fn := &function{
+func (m *Module) NewFunction(name string, returnType Type, params ...*Parameter) *Function {
+	fn := &Function{
 		Name: name,
 		ReturnType: returnType,
 		Params: params,
@@ -46,13 +53,13 @@ func (m *Module) NewFunction(name string, returnType Type, params ...parameter) 
 	return fn
 }
 
-func (f *function) nextSSA() string {
+func (f *Function) nextSSA() string {
 	f.ssaCounter++
 
 	return fmt.Sprintf("%%%d", f.ssaCounter)
 }
 
-func (f *function) String() string {
+func (f *Function) String() string {
 	var o strings.Builder
 
 	// Get parameter operands

@@ -10,7 +10,7 @@ import (
 type Module struct {
 	Name    string
 	Context *Context
-	functions []*function
+	functions []*Function
 	aliases  []*functionAlias
 }
 
@@ -54,7 +54,7 @@ func printMeta(o *strings.Builder, m *Module) {
 
 type functionAlias struct {
 	Name string
-	Function *function
+	Function *Function
 }
 
 func (a *functionAlias) String() string {
@@ -66,7 +66,7 @@ func (a *functionAlias) String() string {
 	return fmt.Sprintf("@%s = alias %s, ptr @%s", a.Name, fmt.Sprintf("%s (%s)", a.Function.ReturnType, strings.Join(params, " ")), mangleName(a.Function.module.Name, a.Function.Name))
 }
 
-func (m *Module) NewFunctionAlias(name string, function *function) *functionAlias {
+func (m *Module) NewFunctionAlias(name string, function *Function) *functionAlias {
 	a := &functionAlias{
 		Name: name,
 		Function: function,

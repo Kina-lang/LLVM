@@ -11,7 +11,11 @@ type block struct {
 	terminated bool
 }
 
-func (f *function) NewBlock(label string) *block {
+func (b *block) IsTerminated() bool {
+	return b.terminated
+}
+
+func (f *Function) NewBlock(label string) *block {
 	block := &block{
 		label: label,
 		instructions: []Instruction{},

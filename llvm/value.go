@@ -26,6 +26,19 @@ func (t IntType) Const(n int64) Const {
 	return Const{t, n}
 }
 
+type VoidConst struct{}
+func (VoidConst) Type() Type {
+	return Void
+}
+
+func (VoidConst) Identifier() string {
+	return ""
+}
+
+func (voidType) Const() VoidConst {
+	return VoidConst{}
+}
+
 // <type> <ident>
 func operand(v Value) string {
 	return v.Type().String() + " " + v.Identifier()
