@@ -10,6 +10,7 @@ import (
 type Module struct {
 	Name    string
 	Context *Context
+	functions []*function
 }
 
 func NewModule(name string, context *Context) *Module {
@@ -24,6 +25,11 @@ func (m *Module) String() string {
 
 	printMeta(&o, m)
 	printBlankLine(&o)
+
+	for _, fn := range m.functions {
+		printComment(&o, fmt.Sprintf("Function %s", fn.Name))
+		fmt.Fprintf(&o, "%s\n", fn.String())
+	}
 
 	return o.String()
 }
