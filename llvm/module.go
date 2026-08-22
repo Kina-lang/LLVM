@@ -8,13 +8,13 @@ import (
 )
 
 type Module struct {
-	Name string
+	Name    string
 	Context *Context
 }
 
 func NewModule(name string, context *Context) *Module {
 	return &Module{
-		Name: name,
+		Name:    name,
 		Context: context,
 	}
 }
@@ -23,6 +23,7 @@ func (m *Module) String() string {
 	var o strings.Builder
 
 	printMeta(&o, m)
+	printBlankLine(&o)
 
 	return o.String()
 }
