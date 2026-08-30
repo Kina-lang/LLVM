@@ -7,7 +7,7 @@ import (
 
 type Parameter struct {
 	Name string
-	typ Type
+	typ  Type
 }
 
 func (p Parameter) Type() Type {
@@ -21,31 +21,37 @@ func (p Parameter) Identifier() string {
 func NewParameter(name string, typ Type) *Parameter {
 	return &Parameter{
 		Name: name,
-		typ: typ,
+		typ:  typ,
 	}
 }
 
 type Function struct {
-	Name string
+	Name       string
 	ReturnType Type
-	Params []*Parameter
+	Params     []*Parameter
 
 	module *Module
 	blocks []*block
 
 	ssaCounter int
+	noMangle   bool
 }
 
-func (m *Module) NewFunction(name string, returnType Type, params ...*Parameter) *Function {
+type NewFunctionOptions struct {
+	NoMangle bool
+}
+
+func (m *Module) NewFunction(opts NewFunctionOptions, name string, returnType Type, params ...*Parameter) *Function {
 	fn := &Function{
-		Name: name,
+		Name:       name,
 		ReturnType: returnType,
-		Params: params,
+		Params:     params,
 
 		blocks: []*block{},
 		module: m,
 
 		ssaCounter: 0,
+		noMangle:   opts.NoMangle,
 	}
 
 	m.functions = append(m.functions, fn)
@@ -65,7 +71,12 @@ func (f *Function) String() string {
 	// Get parameter operands
 	parameterStrings := make([]string, len(f.Params))
 	for i, p := range f.Params {
-		parameterStrings[i] = operand(p)
+		str := p.Type().String()
+		if len(f.blocks) > 0 {
+			str = operand(p)
+		}
+
+		parameterStrings[i] = str
 	}
 
 	keyword := "declare"
@@ -73,8 +84,13 @@ func (f *Function) String() string {
 		keyword = "define"
 	}
 
+	name := f.Name
+	if !f.noMangle {
+		name = mangleName(f.module.Name, f.Name)
+	}
+
 	// <keyword> <return type> @<function name>(<parameter types>)
-	fmt.Fprintf(&o, "%s %s @%s(%s)", keyword, f.ReturnType, mangleName(f.module.Name, f.Name), strings.Join(parameterStrings, ", "))
+	fmt.Fprintf(&o, "%s %s @%s(%s)", keyword, f.ReturnType, name, strings.Join(parameterStrings, ", "))
 
 	// If no blocks (external function), return the string
 	if len(f.blocks) == 0 {
